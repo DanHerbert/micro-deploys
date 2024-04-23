@@ -22,7 +22,8 @@ fi
 if [[ $(git branch --show-current) != 'main' ]]; then
     git checkout --force main
 fi
-git pull --force
+git pull --force --recurse-submodules
+git submodule update --recursive --init
 npm install
 npm run publish
 }; exit
