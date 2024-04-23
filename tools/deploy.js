@@ -25,6 +25,9 @@ const LAST_DEPLOY_HASH_PATH = `${OUT}/latest-deploy.txt`;
 doDeploy();
 
 async function doDeploy() {
+  for (let source of config.util.getConfigSources()) {
+    console.info(`Deploying with config: ${source.name}`);
+  }
   fs.mkdir(OUT, { recursive: true });
   const {oldDeployHash, newDeployHash} = await checkIfOutdated();
   await obtainDeployLock();
