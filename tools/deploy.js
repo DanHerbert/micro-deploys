@@ -113,7 +113,7 @@ async function getLastSnapshotDir() {
   const snapshotsList = await fs.readdir(SNAPSHOTS);
   if (snapshotsList?.length) {
     const snapshots = snapshotsList.sort();
-    return snapshots[snapshots.length - 1];
+    return `${SNAPSHOTS}/${snapshots[snapshots.length - 1]}`;
   }
   return undefined;
 }
