@@ -1,0 +1,26 @@
+{
+  "name": "micro-deploys",
+  "version": "0.0.1",
+  "type": "module",
+  "author": "Dan Herbert <microdeploys-dan@hrbrt.co> (https://dan.herbert.io/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DanHerbert/micro-deploys.git"
+  },
+  "dependencies": {
+    "app-root-path": "^3.1",
+    "config": "^3.3",
+    "pug": "^3.0",
+    "pug-cli": "@anduh/pug-cli",
+    "stylus": "^0.61",
+    "typescript": "^5.4",
+    "chokidar": "^3.6",
+    "debounce": "^2.0",
+    "http-server": "^14.1"
+  },
+  "scripts": {
+    "build": "tools/build.js",
+    "watch": "tools/watch.js",
+    "deploy": "tools/deploy.js"
+  }
+}

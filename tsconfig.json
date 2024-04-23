@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./output/build/js/",
+    "target": "es2018",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+  },
+  "include": [ "./example/ts/*" ]
+}
