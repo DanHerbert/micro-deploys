@@ -1,0 +1,9 @@
+/* Author */
+Dan Herbert
+Philadelphia, PA, USA
+Mastodon: @DanHerbert@mastodon.social
+https://dan.herbert.io/
+
+/* Site */
+Software: Node.js, npm, Stylus, Pug
+Code: https://github.com/DanHerbert/micro-deploys
