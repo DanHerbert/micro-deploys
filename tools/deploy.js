@@ -1,24 +1,18 @@
 #!/usr/bin/node
 
-import appRoot from "app-root-path";
+import {appRootPath, toAbsolute} from "./common.js";
 import config from "config";
 import { execSync } from "node:child_process";
 import { promises as fs, Dirent, existsSync, rmSync } from "node:fs";
 import { buildSite } from "./build.js";
 
-const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
-    .toString()
-    .trim();
-if (gitWorkingTree.length) {
-  appRoot.setPath(gitWorkingTree);
-}
 
 // Length only applies to logging, never used for anything written to disk which
 // always use the full hash.
 const SHORT_HASH_LENGTH = 7;
-const OUT = `${appRoot}/${config.get('outputDir')}`;
-const DEPLOY = `${appRoot}/${config.get("deployDir")}`;
-const SNAPSHOTS = `${appRoot}/${config.get('snapshotsDir')}`;
+const OUT = toAbsolute(config.get('outputDir'));
+const DEPLOY = toAbsolute(config.get('deployDir'));
+const SNAPSHOTS = toAbsolute(config.get('snapshotsDir'));
 const LOCK_PATH = `${OUT}/deploy.lock`;
 const LAST_DEPLOY_HASH_PATH = `${OUT}/latest-deploy.txt`;
 
@@ -42,7 +36,7 @@ async function checkIfOutdated() {
   const oldDeployHash = existsSync(LAST_DEPLOY_HASH_PATH)
     ? await fs.readFile(LAST_DEPLOY_HASH_PATH, { encoding: "utf8" })
     : "";
-  const newDeployHash = execSync('git rev-parse HEAD', { cwd: `${appRoot}` })
+  const newDeployHash = execSync('git rev-parse HEAD', { cwd: `${appRootPath}` })
     .toString()
     .trim();
   if (oldDeployHash === newDeployHash) {
@@ -141,7 +135,7 @@ async function buildToSnapshotDir(newDeployHash) {
 async function deployAndCleanup(oldSnapshotDir, newSnapshotDir) {
   const builtFiles = await getPublicFiles(newSnapshotDir);
   await fs.cp(newSnapshotDir, DEPLOY, { recursive: true });
-  console.info('Copied build to deploy destination.');
+  console.info(`Copied build to ${DEPLOY}`);
 
   const oldDeployFiles = await getPublicFiles(oldSnapshotDir);
   const filesToDelete = oldDeployFiles.filter((f) => !builtFiles.includes(f));

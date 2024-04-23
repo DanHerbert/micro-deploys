@@ -1,26 +1,20 @@
 #!/usr/bin/node
 
-import appRoot from "app-root-path";
+import {appRootPath, toAbsolute} from "./common.js";
 import chokidar from "chokidar";
 import config from "config";
 import debounce from "debounce";
 import { execSync, spawn } from "node:child_process";
 import { buildPug, buildStylus, copyRegularFiles, enumerateFiles } from "./build.js";
 
-const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
-    .toString()
-    .trim();
-if (gitWorkingTree.length) {
-  appRoot.setPath(gitWorkingTree);
-}
 
-const SRC = `${appRoot}/${config.get("srcDir")}`;
-const BUILD = `${appRoot}/${config.get("buildDir")}`;
+const SRC = toAbsolute(config.get("srcDir"));
+const BUILD = toAbsolute(config.get("buildDir"));
 
 await doBuild();
 console.log('Finished initial build. Starting http server...');
 
-const httpServer = spawn('npx', ['http-server', `${BUILD}`], { cwd: `${appRoot}` });
+const httpServer = spawn('npx', ['http-server', `${BUILD}`], { cwd: `${appRootPath}` });
 
 httpServer.stdout.on('data', (data) => {
   console.log('' + data);

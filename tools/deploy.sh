@@ -12,7 +12,7 @@ if [[ -n "$project_root" ]]; then
     project_root=$(cd -- "$script_dir"; git rev-parse --show-toplevel)
 fi
 
-set -euv
+set -eux
 
 cd "$project_root"
 if [[ $(git status --porcelain | wc -l) -gt 0 ]]; then

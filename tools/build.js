@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-import appRoot from "app-root-path";
+import {appRootPath, toAbsolute} from "./common.js";
 import config from "config";
 import pug from "pug";
 import stylus from "stylus";
@@ -9,17 +9,10 @@ import { promisify } from "node:util";
 import { Dirent, promises as fs } from "node:fs";
 import { dirname } from "node:path";
 import PathLike from "node:fs";
-import { pathToFileURL } from 'url'
+import { pathToFileURL } from 'url';
 
-const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
-    .toString()
-    .trim();
-if (gitWorkingTree.length) {
-  appRoot.setPath(gitWorkingTree);
-}
-
-const SRC = `${appRoot}/${config.get("srcDir")}`;
-const BUILD = `${appRoot}/${config.get("buildDir")}`;
+const SRC = toAbsolute(config.get("srcDir"));
+const BUILD = toAbsolute(config.get("buildDir"));
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   // If running as a node.js script (not an ES module) then build the app.
@@ -34,7 +27,7 @@ export async function buildSite(destDir = BUILD) {
     await copyRegularFiles(files.regularFiles, destDir);
     cssToCleanup = await buildStylus(files.stylusFiles, {}, destDir);
     if (files.hasTypescriptFiles) {
-      const tscOpts = { cwd: `${appRoot}` };
+      const tscOpts = { cwd: `${appRootPath}` };
       if (destDir !== BUILD) {
         tscOpts.outDir = `${destDir}/js`;
       }
