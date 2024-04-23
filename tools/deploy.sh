@@ -5,10 +5,11 @@
 # loads into memory before executing.
 {
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-project_root=$(cd -- "$script_dir" && git rev-parse --show-superproject-working-tree)
+echo "$script_dir"
+project_root=$(cd -- "$script_dir"; git rev-parse --show-superproject-working-tree)
 # If not running as a submodule, the project root will be empty.
 if [[ -n "$project_root" ]]; then
-    project_root=$(git rev-parse --show-toplevel)
+    project_root=$(cd -- "$script_dir"; git rev-parse --show-toplevel)
 fi
 
 set -euv
