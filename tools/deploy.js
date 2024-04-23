@@ -20,6 +20,7 @@ doDeploy();
 async function doDeploy() {
   const {oldDeployHash, newDeployHash} = await checkIfOutdated();
   await obtainDeployLock();
+  fs.mkdir(SNAPSHOTS, { recursive: true });
   const oldSnapshotDir = await getLastSnapshotDir();
   const newSnapshotDir = await buildToSnapshotDir(newDeployHash);
   await deployAndCleanup(oldSnapshotDir, newSnapshotDir);
@@ -119,7 +120,6 @@ function getNewSnapshotDir(newDeployHash) {
 }
 
 async function buildToSnapshotDir(newDeployHash) {
-  fs.mkdir(SNAPSHOTS, { recursive: true });
   const newSnapshotDir = getNewSnapshotDir(newDeployHash);
   await buildSite(newSnapshotDir);
   console.info(`Built into ${newSnapshotDir.replace(OUT, config.get('outputDir'))}`);
