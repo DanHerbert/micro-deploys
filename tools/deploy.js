@@ -18,6 +18,7 @@ const LAST_DEPLOY_HASH_PATH = `${OUT}/latest-deploy.txt`;
 doDeploy();
 
 async function doDeploy() {
+  fs.mkdir(OUT, { recursive: true });
   const {oldDeployHash, newDeployHash} = await checkIfOutdated();
   await obtainDeployLock();
   fs.mkdir(SNAPSHOTS, { recursive: true });
