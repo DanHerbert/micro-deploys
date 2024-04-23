@@ -5,13 +5,15 @@
 # loads into memory before executing.
 {
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-echo "$script_dir"
 project_root=$(cd -- "$script_dir"; git rev-parse --show-superproject-working-tree)
 # If not running as a submodule, the project root will be empty.
 if [[ -n "$project_root" ]]; then
     project_root=$(cd -- "$script_dir"; git rev-parse --show-toplevel)
 fi
+echo "deploy project_root:"
+echo "$project_root"
 
+exec 2>&1
 set -eux
 
 cd "$project_root"
