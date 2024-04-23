@@ -25,5 +25,5 @@ fi
 git pull --force --recurse-submodules
 git submodule update --recursive --init
 npm install
-npm run publish
+npm run deploy
 }; exit
