@@ -42,7 +42,7 @@ async function checkIfOutdated() {
   const oldDeployHash = existsSync(LAST_DEPLOY_HASH_PATH)
     ? await fs.readFile(LAST_DEPLOY_HASH_PATH, { encoding: "utf8" })
     : "";
-  const newDeployHash = execSync('git rev-parse HEAD')
+  const newDeployHash = execSync('git rev-parse HEAD', { cwd: `${appRoot}` })
     .toString()
     .trim();
   if (oldDeployHash === newDeployHash) {
@@ -112,7 +112,8 @@ async function getPublicFiles(root) {
 async function getLastSnapshotDir() {
   const snapshotsList = await fs.readdir(SNAPSHOTS);
   if (snapshotsList?.length) {
-    return snapshotsList.sort()[0];
+    const snapshots = snapshotsList.sort();
+    return snapshots[snapshots.length - 1];
   }
   return undefined;
 }

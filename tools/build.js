@@ -34,7 +34,7 @@ export async function buildSite(destDir = BUILD) {
     await copyRegularFiles(files.regularFiles, destDir);
     cssToCleanup = await buildStylus(files.stylusFiles, {}, destDir);
     if (files.hasTypescriptFiles) {
-      const tscOpts = { cwd: appRoot.toString() };
+      const tscOpts = { cwd: `${appRoot}` };
       if (destDir !== BUILD) {
         tscOpts.outDir = `${destDir}/js`;
       }

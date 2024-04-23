@@ -20,7 +20,7 @@ const BUILD = `${appRoot}/${config.get("buildDir")}`;
 await doBuild();
 console.log('Finished initial build. Starting http server...');
 
-const httpServer = spawn('npx', ['http-server', `${BUILD}`]);
+const httpServer = spawn('npx', ['http-server', `${BUILD}`], { cwd: `${appRoot}` });
 
 httpServer.stdout.on('data', (data) => {
   console.log('' + data);
@@ -45,7 +45,7 @@ async function doBuild() {
   await copyRegularFiles(files.regularFiles, BUILD);
   await buildStylus(files.stylusFiles, {compress: true, sourcemap: true}, BUILD);
   if (files.hasTypescriptFiles) {
-    execSync('npx tsc', {cwd: appRoot.toString()});
+    execSync('npx tsc', { cwd: `${appRoot}` });
   }
   await buildPug(files.pugFiles, BUILD);
 }
