@@ -6,6 +6,13 @@ import { execSync } from "node:child_process";
 import { promises as fs, Dirent, existsSync, rmSync } from "node:fs";
 import { buildSite } from "./build.js";
 
+const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
+    .toString()
+    .trim();
+if (gitWorkingTree.length) {
+  appRoot.setPath(gitWorkingTree);
+}
+
 // Length only applies to logging, never used for anything written to disk which
 // always use the full hash.
 const SHORT_HASH_LENGTH = 7;

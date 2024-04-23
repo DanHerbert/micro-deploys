@@ -11,6 +11,13 @@ import { dirname } from "node:path";
 import PathLike from "node:fs";
 import { pathToFileURL } from 'url'
 
+const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
+    .toString()
+    .trim();
+if (gitWorkingTree.length) {
+  appRoot.setPath(gitWorkingTree);
+}
+
 const SRC = `${appRoot}/${config.get("srcDir")}`;
 const BUILD = `${appRoot}/${config.get("buildDir")}`;
 

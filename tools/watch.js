@@ -7,6 +7,13 @@ import debounce from "debounce";
 import { execSync, spawn } from "node:child_process";
 import { buildPug, buildStylus, copyRegularFiles, enumerateFiles } from "./build.js";
 
+const gitWorkingTree = execSync('git rev-parse --show-superproject-working-tree')
+    .toString()
+    .trim();
+if (gitWorkingTree.length) {
+  appRoot.setPath(gitWorkingTree);
+}
+
 const SRC = `${appRoot}/${config.get("srcDir")}`;
 const BUILD = `${appRoot}/${config.get("buildDir")}`;
 
