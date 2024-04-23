@@ -35,10 +35,10 @@ watcher.on('all', debounce(async (event, path) => {
 
 async function doBuild() {
   const files = await enumerateFiles();
-  await copyRegularFiles(files.regularFiles);
-  await buildStylus(files.stylusFiles, {compress: true, sourcemap: true});
+  await copyRegularFiles(files.regularFiles, BUILD);
+  await buildStylus(files.stylusFiles, {compress: true, sourcemap: true}, BUILD);
   if (files.hasTypescriptFiles) {
     execSync('npx tsc', {cwd: appRoot.toString()});
   }
-  await buildPug(files.pugFiles);
+  await buildPug(files.pugFiles, BUILD);
 }
