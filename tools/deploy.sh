@@ -17,6 +17,9 @@ exec 2>&1
 set -eux
 
 cd "$project_root"
+OWNER=$(stat -c "%U" "$project_root")
+GROUP=$(stat -c "%G" "$project_root")
+
 if [[ $(git status --porcelain | wc -l) -gt 0 ]]; then
     git stash push --include-untracked \
         --message "Publishing content $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -24,8 +27,12 @@ fi
 if [[ $(git branch --show-current) != 'main' ]]; then
     git checkout --force main
 fi
-git pull --force --recurse-submodules
-git submodule update --recursive --init
+GIT_SSH_COMMAND="ssh -o BatchMode=yes" git pull --force --recurse-submodules
+GIT_SSH_COMMAND="ssh -o BatchMode=yes" git submodule update --recursive --init
+
+# When this update happens through systemd (root), ownership can get wonky.
+chown -R "$OWNER":"$GROUP" "$project_root"
+
 npm install
 npm run deploy
 }; exit
