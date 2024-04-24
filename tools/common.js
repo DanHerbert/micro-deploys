@@ -13,6 +13,7 @@ function getAppRootPath() {
           .toString()
           .trim());
   }
+  process.env.NODE_CONFIG_DIR = pathJoin(appRootPath, 'config');
   return appRoot.toString();
 }
 
