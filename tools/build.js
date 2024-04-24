@@ -27,11 +27,19 @@ export async function buildSite(destDir = BUILD) {
     await copyRegularFiles(files.regularFiles, destDir);
     cssToCleanup = await buildStylus(files.stylusFiles, {}, destDir);
     if (files.hasTypescriptFiles) {
-      const tscOpts = { cwd: `${appRootPath}` };
+      let tscOpts = '';
       if (destDir !== BUILD) {
-        tscOpts.outDir = `${destDir}/js`;
+        tscOpts = `--outDir "${destDir}/js/"`;
       }
-      execSync('npx tsc', tscOpts);
+      try {
+        execSync(`npx tsc ${tscOpts}`, { cwd: `${appRootPath}`});
+      } catch (err) {
+        console.error('tsc command failed:\n');
+        for (let outSource of err.output) {
+          console.log(outSource.toString());
+        }
+        process.exit(1);
+      }
     }
     await buildPug(files.pugFiles, destDir);
   } finally {
