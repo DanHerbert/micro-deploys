@@ -33,6 +33,11 @@ GIT_SSH_COMMAND="ssh -o BatchMode=yes" git submodule update --recursive --init
 # When this update happens through systemd (root), ownership can get wonky.
 chown -R "$OWNER":"$GROUP" "$project_root"
 
-npm install
-npm run deploy
+if command -v pnpm 2>/dev/null; then
+    pnpm install
+    pnpm run deploy
+else
+    npm install
+    npm run deploy
+fi
 }; exit
