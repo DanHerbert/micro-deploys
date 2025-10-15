@@ -25,6 +25,9 @@ export async function buildSite(destDir = BUILD) {
     await fs.mkdir(destDir, { recursive: true });
     const files = await enumerateFiles();
     await copyRegularFiles(files.regularFiles, destDir);
+    if (files.favicon) {
+      await generateFavicons(files.favicon, destDir);
+    }
     cssToCleanup = await buildStylus(files.stylusFiles, {}, destDir);
     if (files.hasTypescriptFiles) {
       let tscOpts = '';
@@ -58,6 +61,7 @@ export async function enumerateFiles() {
   const pugFiles = [];
   /** @type {Dirent} */
   const regularFiles = [];
+  let favicon;
   let hasTypescriptFiles = false;
   for (let dirEnt of directoryTree) {
     if (dirEnt.isFile()) {
@@ -70,12 +74,15 @@ export async function enumerateFiles() {
         hasTypescriptFiles = true;
       } else if (dirEnt.name.endsWith('.pug')) {
         pugFiles.push(dirEnt);
+      } else if (dirEnt.name === 'favicon.svg') {
+        favicon = dirEnt;
       } else {
         regularFiles.push(dirEnt);
       }
     }
   }
   return {
+    favicon,
     regularFiles,
     stylusFiles,
     pugFiles,
@@ -88,9 +95,9 @@ export async function enumerateFiles() {
  */
 export async function copyRegularFiles(regularFiles, destDir) {
   for (const dirEnt of regularFiles) {
-    const srcPath = `${dirEnt.path}/${dirEnt.name}`;
-    const buildDir = `${dirEnt.path.replace(SRC, destDir)}`
-    const buildPath = `${dirEnt.path.replace(SRC, destDir)}/${dirEnt.name}`;
+    const srcPath = `${dirEnt.parentPath}/${dirEnt.name}`;
+    const buildDir = `${dirEnt.parentPath.replace(SRC, destDir)}`
+    const buildPath = `${dirEnt.parentPath.replace(SRC, destDir)}/${dirEnt.name}`;
     await fs.mkdir(buildDir, { recursive: true });
     await fs.copyFile(srcPath, buildPath);
   }
@@ -112,12 +119,12 @@ export async function buildStylus(stylusFiles, optionsOverride = {}, destDir) {
     sourcemap = optionsOverride.sourcemap;
   }
   for (let stylEnt of stylusFiles) {
-    const stylPath = `${stylEnt.path}/${stylEnt.name}`;
+    const stylPath = `${stylEnt.parentPath}/${stylEnt.name}`;
     const stylStr = await fs.readFile(stylPath, { encoding: "utf8" });
-    const srcDir = stylEnt.path
+    const srcDir = stylEnt.parentPath
       .replace(/\/styl$/g, "/style")
       .replace(/\/styl\//g, "/style/");
-    const outDir = stylEnt.path
+    const outDir = stylEnt.parentPath
       .replace(SRC, destDir)
       .replace(/\/styl$/g, "/style")
       .replace(/\/styl\//g, "/style/");
@@ -153,15 +160,73 @@ export async function buildStylus(stylusFiles, optionsOverride = {}, destDir) {
 export async function buildPug(pugFiles, destDir) {
   for (let pugEnt of pugFiles) {
     const renderPugFile = promisify(pug.renderFile);
-    const htmlStr = await renderPugFile(`${pugEnt.path}/${pugEnt.name}`, {
+    const htmlStr = await renderPugFile(`${pugEnt.parentPath}/${pugEnt.name}`, {
       basedir: SRC,
       pretty: true,
     });
-    const buildDir = `${pugEnt.path.replace(SRC, destDir)}`
+    const buildDir = `${pugEnt.parentPath.replace(SRC, destDir)}`
     const buildPath = `${buildDir}/${pugEnt.name.replace(/\.pug$/, ".html")}`;
     await fs.mkdir(buildDir, { recursive: true });
     await fs.writeFile(buildPath, htmlStr);
   }
+}
+
+/** @param {Dirent} favicon */
+async function generateFavicons(favicon, destDir) {
+  const inFile = `${favicon.parentPath}/${favicon.name}`;
+  const outDir = `${favicon.parentPath.replace(SRC, destDir)}`;
+  const outFile = `${outDir}/${favicon.name}`;
+  await fs.mkdir(outDir, { recursive: true });
+  optimizeSvg(inFile, outFile);
+  // Sizes based on Apple's recommendations:
+  // https://developer.apple.com/design/human-interface-guidelines/app-icons
+  for (let size of [1024,512,256,192,180,167,152,128,120,114,87,80,64,32,16]) {
+    await svgConvert(inFile, outDir, size);
+    optimizePng(outDir, size);
+  }
+  createIco(outDir, destDir);
+}
+
+async function optimizeSvg(inFile, outFile) {
+  try {
+    execSync(`svgo --output ${outFile} ${inFile}`, { cwd: `${appRootPath}`});
+  } catch (err) {
+    console.error('svgo command failed:\n');
+    console.log('inFile: ', inFile);
+    console.log('outfile: ', outfile);
+    process.exit(1);
+  }
+}
+
+async function svgConvert(infile, outDir, size) {
+  try {
+    const pngBuffer = execSync(`rsvg-convert -h "${size}" -w "${size}" "${infile}"`, { cwd: `${appRootPath}`});
+    const pngPath = `${outDir}/favicon-${size}.png`;
+    await fs.writeFile(pngPath, pngBuffer);
+    // optipng "$out_dir/favicon-${size}.png"
+  } catch (err) {
+    console.error('rsvg-convert failed: \n');
+    console.error(err);
+    console.log('size: ', size);
+    console.log('infile: ', infile);
+    process.exit(1);
+  }
+}
+
+async function optimizePng(outDir, size) {
+  const pngPath = `${outDir}/favicon-${size}.png`;
+  try {
+    execSync(`optipng "${pngPath}"`, { cwd: `${appRootPath}`, stdio: []});
+  } catch (err) {
+    console.error('optipng failed: \n');
+    console.log('pngPath: ', pngPath);
+    process.exit(1);
+  }
+}
+
+async function createIco(outDir, destDir) {
+  execSync(`magick -background transparent "${outDir}/favicon-1024.png" -compress none -define icon:auto-resize=16,32,48,64,256 "${outDir}/favicon.ico"`, { cwd: `${appRootPath}`});
+  await fs.copyFile(`${outDir}/favicon.ico`, `${destDir}/favicon.ico`);
 }
 
 /** @param {PathLike[]} cssToCleanup */
