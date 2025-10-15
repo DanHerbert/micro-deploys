@@ -193,7 +193,7 @@ async function optimizeSvg(inFile, outFile) {
   } catch (err) {
     console.error('svgo command failed:\n');
     console.log('inFile: ', inFile);
-    console.log('outfile: ', outfile);
+    console.log('outfile: ', outFile);
     process.exit(1);
   }
 }
