@@ -9,14 +9,14 @@
   },
   "dependencies": {
     "app-root-path": "^3.1",
-    "config": "^4.1",
-    "pug": "^3.0",
-    "pug-cli": "@tokilabs/pug-cli",
-    "stylus": "^0.64",
-    "typescript": "^5.9",
     "chokidar": "^3.6",
+    "config": "^4.1",
     "debounce": "^2.0",
-    "http-server": "^14.1"
+    "http-server": "^14.1",
+    "pug-cli": "@tokilabs/pug-cli",
+    "pug": "^3.0",
+    "stylus": "^0.64",
+    "typescript": "^5.9"
   },
   "scripts": {
     "build": "tools/build.js",
