@@ -99,7 +99,7 @@ async function getPublicFiles(root) {
   });
   pubDirEnts.sort(fileSortComparer(root));
   return pubDirEnts.map((f) =>
-    `${f.path.replace(root, "")}/${f.name}`.replace(/^\//, "")
+    `${f.parentPath.replace(root, "")}/${f.name}`.replace(/^\//, "")
   );
 }
 
