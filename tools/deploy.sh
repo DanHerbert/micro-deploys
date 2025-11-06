@@ -4,14 +4,15 @@
 # All commands must happen within these curly brace blocks to ensure everything
 # loads into memory before executing.
 {
+echo "deploy.sh USER: $USER"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+echo "deploy.sh script_dir: ['$script_dir']"
 project_root=$(cd -- "$script_dir"; git rev-parse --show-superproject-working-tree)
 # If not running as a submodule, the project root will be empty.
 if [[ -z "$project_root" ]]; then
     project_root=$(cd -- "$script_dir"; git rev-parse --show-toplevel)
 fi
-echo "deploy project_root:"
-echo "$project_root"
+echo "deploy.sh project_root: ['$project_root']"
 
 exec 2>&1
 set -eux
