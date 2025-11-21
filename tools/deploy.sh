@@ -22,8 +22,8 @@ OWNER=$(stat -c "%U" "$project_root")
 GROUP=$(stat -c "%G" "$project_root")
 
 if [[ $(git status --porcelain | wc -l) -gt 0 ]]; then
-    git stash push --include-untracked \
-        --message "Publishing content $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    git stash push --include-untracked --message "Publishing content $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    git submodule foreach --recursive "git stash --include-untracked --message \"Publishing content $(date -u '+%Y-%m-%dT%H:%M:%SZ')\""
 fi
 if [[ $(git branch --show-current) != 'main' ]]; then
     git checkout --force main
