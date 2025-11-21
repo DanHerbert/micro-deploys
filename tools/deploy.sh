@@ -5,6 +5,12 @@
 # loads into memory before executing.
 {
 echo "deploy.sh USER: $USER"
+echo "deploy.sh PATH: $PATH"
+echo "deploy.sh PNPM_HOME: $PNPM_HOME"
+# shellcheck disable=SC2154
+echo "deploy.sh npm_config_userconfig: $npm_config_userconfig"
+# shellcheck disable=SC2154
+echo "deploy.sh npm_config_cache: $npm_config_cache"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "deploy.sh script_dir: ['$script_dir']"
 project_root=$(cd -- "$script_dir"; git rev-parse --show-superproject-working-tree)
