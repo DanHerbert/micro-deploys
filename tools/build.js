@@ -4,12 +4,14 @@ import {appRootPath, toAbsolute} from "./common.js";
 import config from "config";
 import pug from "pug";
 import stylus from "stylus";
-import { execSync } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import { Dirent, promises as fs } from "node:fs";
 import { dirname } from "node:path";
 import PathLike from "node:fs";
 import { pathToFileURL } from 'url';
+
+const execPromise = promisify(exec);
 
 const SRC = toAbsolute(config.get("srcDir"));
 const BUILD = toAbsolute(config.get("buildDir"));
@@ -184,12 +186,12 @@ async function generateFavicons(favicon, destDir) {
     await svgConvert(inFile, outDir, size);
     optimizePng(outDir, size);
   }
-  createIco(outDir, destDir);
+  await createIco(outDir, destDir);
 }
 
-async function optimizeSvg(inFile, outFile) {
+function optimizeSvg(inFile, outFile) {
   try {
-    execSync(`svgo --output ${outFile} ${inFile}`, { cwd: `${appRootPath}`});
+    execSync(`svgo --output ${outFile} --input ${inFile}`, { cwd: `${appRootPath}`});
   } catch (err) {
     console.error('svgo command failed:\n');
     console.log('inFile: ', inFile);
@@ -203,7 +205,6 @@ async function svgConvert(infile, outDir, size) {
     const pngBuffer = execSync(`rsvg-convert -h "${size}" -w "${size}" "${infile}"`, { cwd: `${appRootPath}`});
     const pngPath = `${outDir}/favicon-${size}.png`;
     await fs.writeFile(pngPath, pngBuffer);
-    // optipng "$out_dir/favicon-${size}.png"
   } catch (err) {
     console.error('rsvg-convert failed: \n');
     console.error(err);
@@ -213,7 +214,7 @@ async function svgConvert(infile, outDir, size) {
   }
 }
 
-async function optimizePng(outDir, size) {
+function optimizePng(outDir, size) {
   const pngPath = `${outDir}/favicon-${size}.png`;
   try {
     execSync(`optipng "${pngPath}"`, { cwd: `${appRootPath}`, stdio: []});
@@ -225,7 +226,7 @@ async function optimizePng(outDir, size) {
 }
 
 async function createIco(outDir, destDir) {
-  execSync(`magick -background transparent "${outDir}/favicon-1024.png" -compress none -define icon:auto-resize=16,32,48,64,256 "${outDir}/favicon.ico"`, { cwd: `${appRootPath}`});
+  await execPromise(`magick -background transparent "${outDir}/favicon-1024.png" -compress none -define icon:auto-resize=16,32,48,64,256 "${outDir}/favicon.ico"`, { cwd: `${appRootPath}`});
   await fs.copyFile(`${outDir}/favicon.ico`, `${destDir}/favicon.ico`);
 }
 
